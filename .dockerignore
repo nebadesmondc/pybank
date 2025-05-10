@@ -1,0 +1,9 @@
+.git/
+*.pyc
+*.pyo
+__pycahce__/
+venv/
+.venv/
+*.log
+stacticfiles/
+.envs/*
