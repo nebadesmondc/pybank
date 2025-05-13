@@ -1,7 +1,3 @@
-from os import getenv, path
-
-from django.conf.global_settings import EMAIL_BACKEND
-from dotenv import load_dotenv
 from .base import *  # noqa
 from .base import BASE_DIR
 
@@ -27,3 +23,10 @@ DEFAULT_FROM_EMAIL = getenv("DEFAULT_FROM_EMAIL")
 DOMAIN = getenv("DOMAIN")
 
 MAX_UPLOAD_SIZE = 1 * 1024 * 1024
+
+CSF_TRUSTED_ORIGINS = ["http://localhost:8080"]
+LOCKOUT_DURATION = timedelta(minutes=1)
+
+LOGIN_ATTEMPTS = 3
+
+OTP_EXPIRATION = timedelta(minutes=1)
