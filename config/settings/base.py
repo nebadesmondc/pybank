@@ -1,11 +1,11 @@
 from pathlib import Path
-
 from django.conf.global_settings import LOGGING_CONFIG
 from dotenv import load_dotenv
 from os import getenv, path
-
 from loguru import logger
 from datetime import timedelta
+
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -177,6 +177,15 @@ CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 60
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_WORKER_SEND_TASK_EVENTS = True
+CLOUDINARY_API_KEY = getenv("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = getenv("CLOUDINARY_API_SECRET")
+CLOUDINARY_CLOUD_NAME = getenv("CLOUDINARY_CLOUD_NAME")
+
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+)
 
 LOGGING_CONFIG = None
 
