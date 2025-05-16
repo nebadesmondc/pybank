@@ -2,6 +2,7 @@ import uuid
 from typing import Any, Optional
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models, IntegrityError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -29,7 +30,7 @@ class ContentView(TimeStampedModel):
     )
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField(verbose_name=_("Object ID"))
-    content_object = models.GenericForeignKey("content_type", "object_id")
+    content_object = GenericForeignKey("content_type", "object_id")
     viewer_ip = models.GenericIPAddressField(
         verbose_name=_("Viewer IP"), null=True, blank=True
     )

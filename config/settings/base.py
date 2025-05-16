@@ -3,7 +3,7 @@ from django.conf.global_settings import LOGGING_CONFIG
 from dotenv import load_dotenv
 from os import getenv, path
 from loguru import logger
-from datetime import timedelta
+from datetime import timedelta, date
 
 import cloudinary
 
@@ -149,6 +149,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "user_auth.User"
+DEFAULT_BIRTH_DATE = date(2000, 1, 1)
+DEFAULT_DATE = date(2023, 1, 1)
+DEFAULT_EXPIRY_DATE = date(2023, 12, 31)
+DEFAULT_COUNTRY = "CMR"
+DEFAULT_PHONE_NUMBER = "+237679432118"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }

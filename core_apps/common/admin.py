@@ -13,11 +13,11 @@ class ContentViewAdmin(admin.ModelAdmin):
         "user",
         "content_object",
         "content_type",
-        "last_viewed",
+        "last_viewed_at",
         "viewer_ip",
         "created_at",
     ]
-    list_filter = ["content_type", "last_viewed", "created_at"]
+    list_filter = ["content_type", "last_viewed_at", "created_at"]
     readonly_fields = [
         "user",
         "content_object",
@@ -44,7 +44,7 @@ class ContentViewAdmin(admin.ModelAdmin):
                 "fields": (
                     "user",
                     "viewer_ip",
-                    "last_viewed",
+                    "last_viewed_at",
                 )
             },
         ),
