@@ -16,7 +16,7 @@ def send_otp_email(email, otp):
         "site_name": settings.SITE_NAME,
     }
 
-    html_content = render_to_string("email/otp.html", context)
+    html_content = render_to_string("emails/otp_email.html", context)
     text_content = strip_tags(html_content)
     email = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
     email.attach_alternative(html_content, "text/html")
@@ -29,16 +29,16 @@ def send_otp_email(email, otp):
 
 
 def send_account_locked_email(self):
-    subject = _("Your OTP code for login")
+    subject = _("Your account has been locked")
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [self.email]
     context = {
         "full_name": self.fullname,
-        "lockout_duration": int(settings.LOCKOUT_DURATION.total_seconds // 60),
+        "lockout_duration": int(settings.LOCKOUT_DURATION.total_seconds() // 60),
         "site_name": settings.SITE_NAME,
     }
 
-    html_content = render_to_string("email/account_locked.html", context)
+    html_content = render_to_string("emails/account_locked.html", context)
     text_content = strip_tags(html_content)
     email = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
     email.attach_alternative(html_content, "text/html")

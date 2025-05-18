@@ -90,7 +90,7 @@ class User(AbstractUser):
     )
     failed_login_attempts = models.PositiveSmallIntegerField(default=0)
     last_failed_login = models.DateTimeField(null=True, blank=True)
-    otp = models.CharField(_("OTP"), max_length=6, null=True, blank=True)
+    otp = models.CharField(_("OTP"), max_length=6, blank=True)
     otp_expiry_time = models.DateTimeField(_("OTP Expiry Time"), null=True, blank=True)
 
     objects = UserManager()
@@ -104,7 +104,7 @@ class User(AbstractUser):
     ]
 
     def set_otp(self, otp: str) -> None:
-        self.otp = (otp,)
+        self.otp = otp
         self.otp_expiry_time = timezone.now() + settings.OTP_EXPIRATION
         self.save()
 
@@ -122,7 +122,7 @@ class User(AbstractUser):
         if self.failed_login_attempts >= settings.LOGIN_ATTEMPTS:
             self.account_status = self.AccountStatus.LOCKED
             self.save()
-            send_account_locked_email(self.email)
+            send_account_locked_email(self)
         self.save()
 
     def reset_failed_login_attempts(self) -> None:

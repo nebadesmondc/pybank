@@ -46,6 +46,7 @@ class UserManager(DjangoUserManager):
         user = self.model(email=email, username=username, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)
+        return user
 
     def create_user(
         self, email: str, password: Optional[str] = None, **extra_fields: Any
