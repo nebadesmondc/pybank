@@ -69,7 +69,7 @@ class ContentViewAdmin(admin.ModelAdmin):
 
 class ContentViewInline(GenericTabularInline):
     model = ContentView
-    readonly_fields = ["user", "viewer_ip", "last_viewed", "created_at"]
+    readonly_fields = ["user", "viewer_ip", "last_viewed_at", "created_at"]
     extra = 0
     can_delete = False
 
