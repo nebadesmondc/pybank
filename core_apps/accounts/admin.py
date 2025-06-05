@@ -70,7 +70,7 @@ class BankAccountAdmin(admin.ModelAdmin):
     )
 
     def get_approved_by(self, obj):
-        return obj.approved_by.full_name if obj.approved_by else "-"
+        return obj.approved_by.fullname if obj.approved_by else "-"
 
     get_approved_by.short_description = _("Approved By")
     get_approved_by.admin_order_field = "approved_by__full_name"

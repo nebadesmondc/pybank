@@ -5,6 +5,8 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from loguru import logger
 
+from core_apps.accounts.models import BankAccount
+
 
 def send_account_creation_email(user, bank_account):
     subject = _("Your New Bank Account has Created")
@@ -21,4 +23,22 @@ def send_account_creation_email(user, bank_account):
     except Exception as e:
         logger.error(
             f"Failed to send Account Created email to: {user.email}: Error {str(e)}"
+        )
+
+
+def send_full_activation_email(account: BankAccount) -> None:
+    subject = _("Your Bank Account has been Activated")
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [account.user.email]
+    context = {"account": account, "site_name": settings.SITE_NAME}
+    html_content = render_to_string("emails/bank_account_activated.html", context)
+    text_content = strip_tags(html_content)
+    email = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+    email.attach_alternative(html_content, "text/html")
+    try:
+        email.send()
+        logger.info(f"Account Activated email send to: {account.user.email}")
+    except Exception as e:
+        logger.error(
+            f"Failed to send Account Activated email to: {account.user.email}: Error {str(e)}"
         )
