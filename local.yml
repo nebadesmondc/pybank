@@ -5,7 +5,7 @@ services:
       dockerfile: ./docker/local/django/Dockerfile
     volumes:
       - .:/app:z
-      - ./staticfiles:/app/staticfiles
+      - staticfiles:/app/staticfiles
 #    ports:
 #      - "8000:8000"
     expose:
@@ -28,7 +28,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pybank_local_db:/var.lib/postgresql/data
+      - pybank_local_db:/var/lib/postgresql/data
     env_file:
       - ./.envs/.env.local
     networks:
@@ -97,7 +97,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - ./staticfiles:/app/staticfiles
+      - staticfiles:/app/staticfiles
       - logs_store:/var/log/nginx
     ports:
       - "8080:80"
@@ -117,3 +117,4 @@ volumes:
     rabbitmq_data:
     rabbitmq_log:
     flower_db:
+    staticfiles:
