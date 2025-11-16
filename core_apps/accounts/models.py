@@ -26,7 +26,7 @@ class BankAccount(TimeStampedModel):
         XAF = "xaf", _("XAF")
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="bank_account"
+        User, on_delete=models.CASCADE, related_name="bank_accounts"
     )
     account_number = models.CharField(_("Account Number"), max_length=20, unique=True)
     account_balance = models.DecimalField(

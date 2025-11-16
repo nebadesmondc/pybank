@@ -15,27 +15,28 @@ class GenericJSONRenderer(JSONRenderer):
         accepted_media_type: Optional[str] = None,
         renderer_context: Optional[str] = None,
     ) -> Union[bytes, str]:
-        if renderer_context is None:
-            renderer_context = {}
-
-        view = renderer_context.get("view")
-
-        if hasattr(view, "object_label"):
-            object_label = view.object_label
-        else:
-            object_label = self.object_label
+        renderer_context = renderer_context or {}
 
         response = renderer_context.get("response")
+        view = renderer_context.get("view")
+
         if not response:
             raise ValueError(_("Response is required in the renderer context"))
 
         status_code = response.status_code
 
-        errors = data.get("errors", None)
+        object_label = getattr(view, "object_label", self.object_label)
 
-        if errors is not None:
-            return super(GenericJSONRenderer, self).render(data)
+        if status_code in (204, 205, 304) or data is None:
+            return b""
 
-        return json.dumps({"status_code": status_code, object_label: data}).encode(
-            self.charset
-        )
+        if not isinstance(data, dict):
+            wrapper = {"status_code": status_code, object_label: data}
+            return json.dumps(wrapper).encode(self.charset)
+
+        if "errors" in data:
+            return super().render(data, accepted_media_type, renderer_context)
+
+        wrapped = {"status_code": status_code, object_label: data}
+
+        return json.dumps(wrapped).encode(self.charset)
