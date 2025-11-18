@@ -14,6 +14,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from .models import BankAccount, Transaction
+from django.db import transaction
 
 User = get_user_model()
 
@@ -133,3 +134,18 @@ def generate_transaction_pdf(user_id, start_date, end_date, account_number=None)
     except Exception as e:
         logger.error(f"Error generating transaction PDF for user {user_id}: {str(e)}")
         return f"Error generating transaction PDF: {str(e)}"
+
+
+@shared_task
+def apply_daily_interest():
+    savings_accounts = BankAccount.objects.filter(
+        account_type=BankAccount.AccountType.SAVINGS
+    )
+
+    for account in savings_accounts:
+        with transaction.atomic():
+            account.apply_daily_interest()
+    logger.info(
+        f"Done applying daily interest to {savings_accounts.count()} saving accounts"
+    )
+    return f"Done applying daily interest to {savings_accounts.count()} saving accounts"
