@@ -5,7 +5,7 @@ from dateutil import parser
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.utils.translation import gettext_lazy as _
 from loguru import logger
 from reportlab.lib import colors
@@ -15,6 +15,11 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from .models import BankAccount, Transaction
 from django.db import transaction
+from os import getenv
+from decimal import Decimal
+from _datetime import timedelta
+from django.utils import timezone
+from .emails import send_suspicious_activity_alert
 
 User = get_user_model()
 
@@ -149,3 +154,64 @@ def apply_daily_interest():
         f"Done applying daily interest to {savings_accounts.count()} saving accounts"
     )
     return f"Done applying daily interest to {savings_accounts.count()} saving accounts"
+
+
+@shared_task
+def detect_suspicious_activities():
+    LARGE_TRANSACTION_THRESHOLD = Decimal(getenv("LARGE_TRANSACTION_THRESHOLD"))
+
+    FREQUENT_TRANSACTION_THRESHOLD = int(getenv("FREQUENT_TRANSACTION_THRESHOLD"))
+
+    TIME_WINDOW_HOURS = int(getenv("TIME_WINDOW_HOURS"))
+
+    TIME_WINDOW = timedelta(hours=TIME_WINDOW_HOURS)
+
+    now = timezone.now()
+
+    time_threshold = now - TIME_WINDOW
+    suspicious_activities = []
+
+    large_transactions = Transaction.objects.filter(
+        amount__gte=LARGE_TRANSACTION_THRESHOLD, created_at__lte=time_threshold
+    )
+
+    for transaction in large_transactions:
+        suspicious_activities.append(
+            f"Large transaction detected: {transaction.amount} by user {transaction.user.fullname}"
+        )
+
+    users = User.objects.all()
+    for user in users:
+        user_transactions = Transaction.objects.filter(
+            user=user, created_at__gte=time_threshold
+        )
+        if user_transactions.count() > FREQUENT_TRANSACTION_THRESHOLD:
+            suspicious_activities.append(
+                f"Frequent transactions detected: {user_transactions.count()} by user {user.email}"
+            )
+
+    accounts = BankAccount.objects.all()
+    for account in accounts:
+        balance_change = Transaction.objects.filter(
+            Q(sender_account=account) | Q(receiver_account=account),
+            created_at__gte=time_threshold,
+        ).aggregate(
+            total_sent=Sum("amount", filter=Q(sender_account=account)),
+            total_received=Sum("amount", filter=Q(receiver_account=account)),
+        )
+        total_change = (balance_change["total_received"] or Decimal("0")) - (
+            balance_change["total_sent"] or Decimal("0")
+        )
+
+        if abs(total_change) > LARGE_TRANSACTION_THRESHOLD:
+            suspicious_activities.append(
+                f"Large balance change detected: {total_change} for account {account.account_number}"
+            )
+
+        if suspicious_activities:
+            num_activities = send_suspicious_activity_alert(suspicious_activities)
+            if num_activities > 0:
+                return f"Suspicious activity check completed. {num_activities} suspicious activities detected and reported."
+            else:
+                return f"Suspicious activity check complete. Activities detected but alert email failed to send"
+    return f"Suspicious activity check complete. No suspicious activities detected."
